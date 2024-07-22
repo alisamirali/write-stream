@@ -18,12 +18,20 @@ const Document = async ({ params: { id } }: SearchParamProps) => {
   const userIds = Object.keys(room.usersAccesses);
   const users = await getClerkUsers({ userIds });
 
-  const usersData = users.map((user: User) => ({
-    ...user,
-    userType: room.usersAccesses[user.email]?.includes("room:write")
-      ? "editor"
-      : "viewer",
-  }));
+  // Check if users is an array
+  const usersData = Array.isArray(users)
+    ? users.map((user: User) => {
+        const userType: UserType | undefined = room.usersAccesses?.[
+          user.email
+        ]?.includes("room:write")
+          ? "editor"
+          : "viewer";
+        return {
+          ...user,
+          userType,
+        };
+      })
+    : [];
 
   const currentUserType = room.usersAccesses[
     clerkUser.emailAddresses[0].emailAddress
